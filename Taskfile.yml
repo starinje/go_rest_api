@@ -1,0 +1,27 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - go build -o app cmd/server/main.go
+
+  test:
+    cmds:
+      - go test -v ./..
+
+  lint:
+    cmds:
+      - golangci-lint run
+
+  run:
+    cmds:
+      - docker-compose up --build
+
+  migrate-force:
+    cmds:
+      - docker-compose exec comments-database psql -U postgres -d postgres -c "DROP TABLE IF EXISTS comments; DROP TABLE IF EXISTS schema_migrations;"
+
+  migrate-retry:
+    deps: [migrate-force]
+    cmds:
+      - task: run
