@@ -1,12 +1,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
 
 	"go_rest_api/internal/comment"
 
 	"go_rest_api/internal/db"
+
+	transportHttp "go_rest_api/internal/transport/http"
 )
 
 // Run - is going to be responsible for
@@ -28,26 +29,10 @@ func Run() error {
 
 	cmtService := comment.NewService(db)
 
-	cmtService.PostComment(
-		context.Background(),
-		comment.Comment{
-			ID:     "ff1d4530-959b-4a2d-a12f-47c095350e1b",
-			Slug:   "my-first-comment",
-			Author: "Elliott",
-			Body:   "Hello, World",
-		},
-	)
-
-	fmt.Println(cmtService.GetComment(
-		context.Background(),
-		"ff1d4530-878b-4a2d-a12f-47c095350e1b",
-	))
-
-	if err := db.Ping(context.Background()); err != nil {
+	httpHandler := transportHttp.NewHandler(cmtService)
+	if err := httpHandler.Serve(); err != nil {
 		return err
 	}
-
-	fmt.Println("Successfully connected and pinged database!")
 
 	return nil
 
